@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "258548925361",
+    "firebase_url": "https://letschatencrypted.firebaseio.com",
+    "project_id": "letschatencrypted",
+    "storage_bucket": "letschatencrypted.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:258548925361:android:46851dffdbeaf0b502b390",
+        "android_client_info": {
+          "package_name": "com.mohammadsuhail.letschatencrypted"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "258548925361-f58klkd8nmak0j8norhshbsh2o3utp1a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mohammadsuhail.letschatencrypted",
+            "certificate_hash": "2ab57405b69d602f324a3f16e306c0d6c1622c03"
+          }
+        },
+        {
+          "client_id": "258548925361-7cno5uf7t63ldva36n3v8odb1t700ul8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBmRq21ZVdTep4C9lfOofDTnC0DlxiIIb0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "258548925361-7cno5uf7t63ldva36n3v8odb1t700ul8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
