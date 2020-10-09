@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#fff"
+        android:orientation="vertical"
+        android:padding="20dp"
+        tools:context=".LoginActivity">
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="100dp"
+            android:layout_gravity="center"
+            android:layout_height="100dp"
+            android:src="@drawable/ic_baseline_account_circle_24" />
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/baloo_thambi"
+            android:text="WELCOME BACK"
+            android:textColor="#000"
+            android:textSize="25sp" />
+
+        <TextView
+            android:id="@+id/textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/baloo_bhai"
+            android:textColor="#000"
+            android:text="Lets Chat"
+            android:textSize="30sp" />
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Verify your phone number"
+            android:textSize="16sp" />
+
+        <com.hbb20.CountryCodePicker
+            android:id="@+id/ccp_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:ccp_autoDetectCountry="true"
+            app:ccp_showFlag="true"
+            android:layout_marginTop="20dp"
+            app:ccp_hintExampleNumberType="FIXED_LINE_OR_MOBILE"
+            android:padding="4dp"
+            app:ccp_showNameCode="true"
+            app:ccp_showFullName="true"
+            android:background="@drawable/black_border"
+            />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/userlayout_id"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+            android:layout_width="match_parent"
+            app:counterEnabled="true"
+            app:errorEnabled="true"
+            app:counterMaxLength="18"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:hint="Username">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:id="@+id/username_id"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/phonelayout_id"
+            android:layout_marginTop="10dp"
+            android:hint="Phone number"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+            android:layout_width="match_parent"
+            app:errorEnabled="true"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/phonenumber_id"
+                android:inputType="phone"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#00000000"
+            android:text="why needed?"
+            android:gravity="right|center_vertical"
+            android:paddingRight="10dp"
+            android:id="@+id/forgetpassword_id"/>
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Go"
+            android:id="@+id/go_id"
+            android:background="@color/colorPrimaryDark"
+            android:textColor="#fff"/>
+
+
+    </LinearLayout>
+</ScrollView>

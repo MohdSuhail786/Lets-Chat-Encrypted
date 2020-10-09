@@ -2,6 +2,7 @@ package com.mohammadsuhail.letschatencrypted;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.WindowManager;
@@ -39,7 +40,8 @@ public class SplashActivity extends AppCompatActivity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(SplashActivity.this, "Runnable Working", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(SplashActivity.this,MainActivity.class));
+                finish();
             }
         },SPLASH_TIMEOUT);
 
