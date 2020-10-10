@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Objects;
 
 public class ChatboxActivity extends AppCompatActivity {
-    private String data = "Hello this is Mohd Suhail";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
