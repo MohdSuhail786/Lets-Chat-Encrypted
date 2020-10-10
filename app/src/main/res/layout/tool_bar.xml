@@ -11,4 +11,19 @@
     app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
     android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
+    <ProgressBar
+        android:id="@+id/toolbar_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:maxHeight="35dp"
+        android:minHeight="35dp"
+        android:minWidth="10dp"
+        android:maxWidth="30dp"
+        android:indeterminateTint="#cccccc"
+        android:indeterminateTintMode="src_in"
+        android:indeterminate="true"
+        android:layout_gravity="end"
+        android:visibility="gone"
+        />
 </androidx.appcompat.widget.Toolbar>

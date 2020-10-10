@@ -7,18 +7,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ContactHolder> {
+public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactHolder> {
     private ArrayList<Contact> contactsList;
 
     // Counstructor for the Class
-    public MyAdapter(ArrayList<Contact> contactsList, Context context) {
+    public ContactAdapter(ArrayList<Contact> contactsList, Context context) {
         this.contactsList = contactsList;
     }
 
@@ -48,9 +47,9 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ContactHolder> {
         holder.setContactName(contact.getName());
         holder.setContactNumber(contact.getNumber());
         holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(view.getContext(),ChatBox.class);
+                @Override
+                public void onClick(View view) {
+                Intent intent = new Intent(view.getContext(), ChatboxActivity.class);
                 intent.putExtra("name",contact.getName());
                 intent.putExtra("number",contact.getNumber());
                 view.getContext().startActivity(intent);

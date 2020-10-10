@@ -14,14 +14,11 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.os.Handler;
 import android.provider.ContactsContract;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.Toast;
+import android.widget.ProgressBar;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -31,7 +28,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -39,8 +35,9 @@ import java.util.Objects;
 public class ContactsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int CONTACTS_LOADER_ID = 1;
+    private ProgressBar progressBar;
     Map<String, Boolean> namePhoneMap = new HashMap<String, Boolean>();
-    private MyAdapter listAdapter;
+    private ContactAdapter listAdapter;
     private static ArrayList<Contact> contactsList = new ArrayList<>();
     private RecyclerView recyclerView;
 
@@ -50,6 +47,7 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        progressBar = getActivity().findViewById(R.id.toolbar_progress_bar);
 //        getLoaderManager().initLoader(CONTACTS_LOADER_ID, null, this);
     }
 
@@ -57,14 +55,17 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
         if (isVisibleToUser) {
-            if(contactsList.size() == 0)
-            getLoaderManager().initLoader(CONTACTS_LOADER_ID, null, this);
+            if(contactsList.size() == 0){
+                progressBar.setVisibility(View.VISIBLE);
+                getLoaderManager().initLoader(CONTACTS_LOADER_ID, null, this);
+
+            }
             else {
                 recyclerView = getActivity().findViewById(R.id.myRecyclerView);
                 recyclerView.setHasFixedSize(true);
                 LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
                 recyclerView.setLayoutManager(layoutManager);
-                listAdapter = new MyAdapter(contactsList,getActivity().getApplicationContext());
+                listAdapter = new ContactAdapter(contactsList,getActivity().getApplicationContext());
                 recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
                 recyclerView.setAdapter(listAdapter);
             }
@@ -91,11 +92,12 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
         recyclerView.setLayoutManager(layoutManager);
-        listAdapter = new MyAdapter(contactsList,getActivity().getApplicationContext());
+        listAdapter = new ContactAdapter(contactsList,getActivity().getApplicationContext());
         recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
         recyclerView.setAdapter(listAdapter);
 
         contactsFromCursor(data);
+
     }
 
     @Override
@@ -134,13 +136,14 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
                                     listAdapter.notifyDataSetChanged();
                                 }
                                 namePhoneMap.put(finalNumber,true);
+                                progressBar.setVisibility(View.GONE);
                             }
+                            else progressBar.setVisibility(View.GONE);
                          }
                          @Override
                          public void onCancelled(@NonNull DatabaseError error) {
 
                          }
-
                      });
                  }
             } while (cursor.moveToNext());

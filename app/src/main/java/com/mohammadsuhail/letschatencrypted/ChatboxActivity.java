@@ -10,10 +10,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
-public class ChatBox extends AppCompatActivity {
-
+public class ChatboxActivity extends AppCompatActivity {
+    private String data = "Hello this is Mohd Suhail";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,15 +33,26 @@ public class ChatBox extends AppCompatActivity {
         String name = getIntent().getStringExtra("name");
         String number = getIntent().getStringExtra("number");
         Objects.requireNonNull(getSupportActionBar()).setTitle(name);
-        this.overridePendingTransition(R.anim.enter_activity,
-                R.anim.exit_activity);
+        this.overridePendingTransition(R.anim.enter_activity, R.anim.exit_activity);
+
+        DatabaseHandler db = new DatabaseHandler(this);
+        db.deleteChat(new Chat(name,number));
+        db.addChat(new Chat(name,number));
+        db.addMessage(number,"Hello this is MOHD SUHAIL","10:32");
+
+        ArrayList<String> arrayList = db.getMessages(new Chat(name,number));
+        String ans = "";
+        for(String s:arrayList) {
+            ans += s;
+        }
+        Toast.makeText(this, ans, Toast.LENGTH_SHORT).show();
+
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        this.overridePendingTransition(R.anim.enter_activity,
-                R.anim.exit_activity);
+        this.overridePendingTransition(R.anim.enter_activity, R.anim.exit_activity);
         startActivity(new Intent(this,MainActivity.class));
         finish();
     }
