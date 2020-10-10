@@ -28,8 +28,8 @@ public class MainActivity extends AppCompatActivity {
         currentUser = firebaseAuth.getCurrentUser();
         Toolbar toolbar = findViewById(R.id.mainToolBar);
         setSupportActionBar(toolbar);
+        toolbar.setPadding(10,0,0,0);
         Objects.requireNonNull(getSupportActionBar()).setTitle("Lets Chat");
-
         ViewPager viewPager = findViewById(R.id.mainTabsPager);
         viewPager.setAdapter(new TabsAdapter(getSupportFragmentManager()));
         TabLayout tabLayout = findViewById(R.id.mainTabs);

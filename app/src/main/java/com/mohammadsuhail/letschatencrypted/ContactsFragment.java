@@ -41,7 +41,7 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
     private static final int CONTACTS_LOADER_ID = 1;
     Map<String, Boolean> namePhoneMap = new HashMap<String, Boolean>();
     private MyAdapter listAdapter;
-    private ArrayList<Contact> contactsList = new ArrayList<>();
+    private static ArrayList<Contact> contactsList = new ArrayList<>();
     private RecyclerView recyclerView;
 
     public ContactsFragment() {
@@ -50,7 +50,25 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getLoaderManager().initLoader(CONTACTS_LOADER_ID, null, this);
+//        getLoaderManager().initLoader(CONTACTS_LOADER_ID, null, this);
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser) {
+            if(contactsList.size() == 0)
+            getLoaderManager().initLoader(CONTACTS_LOADER_ID, null, this);
+            else {
+                recyclerView = getActivity().findViewById(R.id.myRecyclerView);
+                recyclerView.setHasFixedSize(true);
+                LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
+                recyclerView.setLayoutManager(layoutManager);
+                listAdapter = new MyAdapter(contactsList,getActivity().getApplicationContext());
+                recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
+                recyclerView.setAdapter(listAdapter);
+            }
+        }
     }
 
     @Override
