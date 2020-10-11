@@ -20,6 +20,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String KEY_NAME = "name";
     private static final String KEY_MESSAGE = "message";
     private static final String KEY_MSG_TIME = "time";
+    private static final String KEY_STATUS = "status";
 
     private static final String KEY_PH_NO = "phone_number";
     Context context;
@@ -31,7 +32,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         String chatTable = "CREATE TABLE " + TABLE_CHATS + "(" + KEY_PH_NO + " TEXT PRIMARY KEY," + KEY_NAME + " TEXT" + ")";
-        String messageTable = "CREATE TABLE " + TABLE_MESSAGES + "(" + KEY_PH_NO + " TEXT PRIMARY KEY," + KEY_MESSAGE + " TEXT," + KEY_MSG_TIME +" TEXT" + ")";
+        String messageTable = "CREATE TABLE " + TABLE_MESSAGES + "(" + KEY_PH_NO + " TEXT," + KEY_MESSAGE + " TEXT," + KEY_MSG_TIME +" TEXT, " + KEY_STATUS +" TEXT" + ")";
         db.execSQL(chatTable);
         db.execSQL(messageTable);
     }
@@ -50,12 +51,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.close();
     }
 
-    void addMessage(String number,String msg,String time) {
+    void addMessage(Chat chat,Message message) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(KEY_PH_NO,number);
-        values.put(KEY_MESSAGE,msg);
-        values.put(KEY_MSG_TIME,time);
+        values.put(KEY_PH_NO,chat.getNumber());
+        values.put(KEY_MESSAGE,message.getMessage());
+        values.put(KEY_MSG_TIME,message.getTime());
+        values.put(KEY_STATUS,message.getStatus());
         db.insert(TABLE_MESSAGES,null,values);
         db.close();
     }
@@ -69,28 +71,28 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         if (cursor.moveToFirst()) {
             do {
-               Chat chat = new Chat();
-               chat.setNumber(cursor.getString(0));
-               chat.setName(cursor.getString(1));
+                Chat chat = new Chat();
+                chat.setNumber(cursor.getString(0));
+                chat.setName(cursor.getString(1));
 
-               list.add(0,chat);
+                list.add(0,chat);
             } while (cursor.moveToNext());
         }
 
         return list;
     }
 
-    ArrayList<String> getMessages(Chat chat) {
-        ArrayList<String> list = new ArrayList<>();
-//select * from (select * from demo where ID=1) NATURAL JOIN demoinfo;
-//        Toast.makeText(context, chat.getNumber(), Toast.LENGTH_SHORT).show();
+
+    ArrayList<Message> getMessages(Chat chat) {
+        ArrayList<Message> list = new ArrayList<>();
         String selectQuery = "SELECT  * FROM " + "( " + " SELECT * FROM "+ TABLE_CHATS + " WHERE "+ KEY_PH_NO + " = " + "\""+ chat.getNumber() + "\"" + " ) " + "NATURAL JOIN " + TABLE_MESSAGES;
         SQLiteDatabase db = this.getReadableDatabase();
         @SuppressLint("Recycle") Cursor cursor = db.rawQuery(selectQuery, null);
 
         if (cursor.moveToFirst()) {
             do {
-                list.add(0,cursor.getString(2));
+                Message message = new Message(cursor.getString(2),cursor.getString(3),cursor.getString(4),cursor.getString(0));
+                list.add(message);
             } while (cursor.moveToNext());
         }
         return list;
