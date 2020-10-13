@@ -125,13 +125,13 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
             do {
                 String number = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
                 String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-                 if(isValid(number)) {
-                     number = number.replaceAll("\\s","");
-                     final String finalNumber = number;
-                     final String finalName = name;
-                     root.child("Users").child(finalNumber).addListenerForSingleValueEvent(new ValueEventListener() {
-                         @Override
-                         public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(isValid(number)) {
+                    number = number.replaceAll("\\s","");
+                    final String finalNumber = number;
+                    final String finalName = name;
+                    root.child("Users").child(finalNumber).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if(snapshot.getValue() != null) {
 //                                Toast.makeText(Objects.requireNonNull(getActivity()).getApplicationContext(), finalNumber, Toast.LENGTH_SHORT).show();
                                 if(!namePhoneMap.containsKey(finalNumber)){
@@ -142,21 +142,18 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
                                 progressBar.setVisibility(View.GONE);
                             }
                             else progressBar.setVisibility(View.GONE);
-                         }
-                         @Override
-                         public void onCancelled(@NonNull DatabaseError error) {
+                        }
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
 
-                         }
-                     });
-                 }
+                        }
+                    });
+                }
             } while (cursor.moveToNext());
         }
     }
     boolean isValid(String number) {
         return number!=null && !number.contains(".") && !number.contains("#") && !number.contains("$") && !number.contains("[") && !number.contains("]");
     }
-
-
-
 
 }
