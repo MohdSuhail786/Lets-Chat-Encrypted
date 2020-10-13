@@ -17,12 +17,15 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 public class SplashActivity extends AppCompatActivity {
     private static int SPLASH_TIMEOUT = 4000;
     private Animation toptoBot, bottoTop, lefttoRight;
     private RelativeLayout relativeLayout;
     private TextView letsChat, myname;
-
+    private FirebaseUser firebaseUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,13 +44,18 @@ public class SplashActivity extends AppCompatActivity {
         relativeLayout.setAnimation(toptoBot);
         letsChat.setAnimation(lefttoRight);
         myname.setAnimation(bottoTop);
-
-
+        final Intent intent;
+        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if(firebaseUser == null) {
+            intent = new Intent(this,LoginActivity.class);
+        } else {
+            intent = new Intent(this,MainActivity.class);
+        }
 
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                startActivity(new Intent(SplashActivity.this, MainActivity.class));
+                startActivity(intent);
                 finish();
             }
         }, SPLASH_TIMEOUT);
