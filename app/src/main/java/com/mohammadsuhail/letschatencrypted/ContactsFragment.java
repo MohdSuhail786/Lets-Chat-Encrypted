@@ -20,6 +20,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -48,6 +50,7 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         progressBar = getActivity().findViewById(R.id.toolbar_progress_bar);
+
 //        getLoaderManager().initLoader(CONTACTS_LOADER_ID, null, this);
     }
 
@@ -152,4 +155,8 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
     boolean isValid(String number) {
         return number!=null && !number.contains(".") && !number.contains("#") && !number.contains("$") && !number.contains("[") && !number.contains("]");
     }
+
+
+
+
 }

@@ -54,8 +54,8 @@
             app:ccp_hintExampleNumberType="FIXED_LINE_OR_MOBILE"
             android:padding="4dp"
             app:ccp_showNameCode="true"
-            app:ccp_showFullName="true"
             android:background="@drawable/black_border"
+            app:ccp_showFullName="true"
             />
 
         <com.google.android.material.textfield.TextInputLayout
