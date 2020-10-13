@@ -19,6 +19,11 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class SplashActivity extends AppCompatActivity {
     private static int SPLASH_TIMEOUT = 4000;
@@ -49,6 +54,7 @@ public class SplashActivity extends AppCompatActivity {
         if(firebaseUser == null) {
             intent = new Intent(this,LoginActivity.class);
         } else {
+//            startReceivingMessagesFromFirebase();
             intent = new Intent(this,MainActivity.class);
         }
 
@@ -59,7 +65,33 @@ public class SplashActivity extends AppCompatActivity {
                 finish();
             }
         }, SPLASH_TIMEOUT);
+    }
 
+    private void startReceivingMessagesFromFirebase() {
+        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        final DatabaseReference root = FirebaseDatabase.getInstance().getReference();
+        final DatabaseHandler db = new DatabaseHandler(this);
+        final ValueEventListener valueEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    for (DataSnapshot s:snapshot.getChildren()) {
+                        Message msg = s.getValue(Message.class);
+                        Toast.makeText(SplashActivity.this, "SPLASH ACTIVITY", Toast.LENGTH_SHORT).show();
+                        db.addChat(new Chat("SUHAIL",msg.getNumber()));
+                        db.addMessage(new Chat("SUHAIL",msg.getNumber()),msg);
+
+                    }
+                    root.child("Chats").child(user.getPhoneNumber()).removeValue();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        };
+        root.child("Chats").child(user.getPhoneNumber()).addValueEventListener(valueEventListener);
     }
 
 

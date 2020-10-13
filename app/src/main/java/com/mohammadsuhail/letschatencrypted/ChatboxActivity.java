@@ -106,25 +106,23 @@ public class ChatboxActivity extends AppCompatActivity {
             }
         });
 
-        receiveMessagesFromFirebase();
-    }
-
-    private void receiveMessagesFromFirebase() {
         valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot s:snapshot.getChildren()) {
-                    Message msg = s.getValue(Message.class);
-                    Toast.makeText(ChatboxActivity.this, "Chatbox", Toast.LENGTH_SHORT).show();
-                    db.addChat(new Chat("SUHAIL",msg.getNumber()));
-                    db.addMessage(new Chat("SUHAIL",msg.getNumber()),msg);
-                    if(msg.getNumber().equals(currentChat.getNumber())) {
-                        messageList.add(msg);
-                        messageListAdapter.notifyDataSetChanged();
-                        messageRecyclerView.smoothScrollToPosition(messageList.size() - 1);
+                if (snapshot.exists()) {
+                    for (DataSnapshot s:snapshot.getChildren()) {
+                        Message msg = s.getValue(Message.class);
+                        Toast.makeText(ChatboxActivity.this, "CHATBOX ACTIVITY", Toast.LENGTH_SHORT).show();
+                        db.addChat(new Chat("SUHAIL",msg.getNumber()));
+                        db.addMessage(new Chat("SUHAIL",msg.getNumber()),msg);
+                        if(msg.getNumber().equals(currentChat.getNumber())) {
+                            messageList.add(msg);
+                            messageListAdapter.notifyDataSetChanged();
+                            messageRecyclerView.smoothScrollToPosition(messageList.size() - 1);
+                        }
                     }
+                    root.child("Chats").child(user.getPhoneNumber()).removeValue();
                 }
-                root.child("Chats").child(user.getPhoneNumber()).removeValue();
             }
 
             @Override
@@ -132,7 +130,14 @@ public class ChatboxActivity extends AppCompatActivity {
 
             }
         };
+
         root.child("Chats").child(user.getPhoneNumber()).addValueEventListener(valueEventListener);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        root.child("Chats").child(user.getPhoneNumber()).removeEventListener(valueEventListener);
     }
 
     @Override

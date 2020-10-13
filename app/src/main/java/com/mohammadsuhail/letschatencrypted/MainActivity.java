@@ -11,6 +11,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.renderscript.Sampler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -30,13 +31,21 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseUser currentUser;
     private FirebaseAuth firebaseAuth;
     private ValueEventListener valueEventListener;
+    private DatabaseHandler db;
+    private DatabaseReference root;
+    private FirebaseUser user;
     private static final int READ_CONTACT_PERMISSION = 100;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         firebaseAuth = FirebaseAuth.getInstance();
         currentUser = firebaseAuth.getCurrentUser();
+        user=FirebaseAuth.getInstance().getCurrentUser();
+        root = FirebaseDatabase.getInstance().getReference();
+        db = new DatabaseHandler(MainActivity.this);
+
         Toolbar toolbar = findViewById(R.id.mainToolBar);
         setSupportActionBar(toolbar);
         toolbar.setPadding(10,0,0,0);
@@ -46,7 +55,35 @@ public class MainActivity extends AppCompatActivity {
         TabLayout tabLayout = findViewById(R.id.mainTabs);
         tabLayout.setupWithViewPager(viewPager);
         checkPermission(Manifest.permission.READ_CONTACTS, READ_CONTACT_PERMISSION);
-        receiveMessagesFromFirebase();
+
+        valueEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    for (DataSnapshot s:snapshot.getChildren()) {
+                        Message msg = s.getValue(Message.class);
+                        Toast.makeText(MainActivity.this, "Main ACTIVITY", Toast.LENGTH_SHORT).show();
+                        db.addChat(new Chat("SUHAIL",msg.getNumber()));
+                        db.addMessage(new Chat("SUHAIL",msg.getNumber()),msg);
+
+                    }
+                    root.child("Chats").child(user.getPhoneNumber()).removeValue();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        };
+
+        root.child("Chats").child(user.getPhoneNumber()).addValueEventListener(valueEventListener);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        root.child("Chats").child(user.getPhoneNumber()).removeEventListener(valueEventListener);
     }
 
     @Override
@@ -85,42 +122,6 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    private void receiveMessagesFromFirebase() {
-        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        final DatabaseReference root = FirebaseDatabase.getInstance().getReference();
-        final DatabaseHandler db = new DatabaseHandler(this);
-        valueEventListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    for (DataSnapshot s:snapshot.getChildren()) {
-                        Message msg = s.getValue(Message.class);
-                        Toast.makeText(MainActivity.this, "MainActivity", Toast.LENGTH_SHORT).show();
-                        db.addChat(new Chat("SUHAIL",msg.getNumber()));
-                        db.addMessage(new Chat("SUHAIL",msg.getNumber()),msg);
-
-                    }
-                    root.child("Chats").child(user.getPhoneNumber()).removeValue();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        };
-        root.child("Chats").child(user.getPhoneNumber()).addValueEventListener(valueEventListener);
-
-
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();/*
-        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        final DatabaseReference root = FirebaseDatabase.getInstance().getReference();
-        root.child("Chats").child(user.getPhoneNumber()).removeEventListener(valueEventListener);*/
-    }
 
     public void checkPermission(String permission, int requestCode) {
         if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_DENIED) {
