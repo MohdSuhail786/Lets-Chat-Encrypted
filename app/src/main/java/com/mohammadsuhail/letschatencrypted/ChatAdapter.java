@@ -4,10 +4,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.drawable.Drawable;
 import android.provider.ContactsContract;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,7 +37,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatHolder> {
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ChatHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final ChatHolder holder, int position) {
 
         final Chat chat = chatlist.get(position);
         holder.setChatName(chat.getName());
@@ -50,6 +52,15 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatHolder> {
                 ((Activity)view.getContext()).startActivity(intent);
             }
         });
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                Toast.makeText(context, "Working", Toast.LENGTH_SHORT).show();
+                holder.setChatNumber("Selected");
+                holder.setImageView(R.drawable.ic_baseline_check_circle_24);
+                return true;
+            }
+        });
     }
 
     @Override
@@ -61,18 +72,17 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatHolder> {
 
         private TextView txtName;
         private TextView txtNumber;
-
+        private ImageView imageView;
         public ChatHolder(View itemView) {
             super(itemView);
-
+            imageView = itemView.findViewById(R.id.imageView3);
             txtName = itemView.findViewById(R.id.txt_name);
             txtNumber = itemView.findViewById(R.id.txt_number);
         }
-
+        public void setImageView(int i) { imageView.setImageResource(i); }
         public void setChatName(String name) {
             txtName.setText(name);
         }
-
         public void setChatNumber(String number) {
             txtNumber.setText(number);
         }

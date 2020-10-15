@@ -24,6 +24,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.Objects;
 
@@ -55,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
         TabLayout tabLayout = findViewById(R.id.mainTabs);
         tabLayout.setupWithViewPager(viewPager);
         checkPermission(Manifest.permission.READ_CONTACTS, READ_CONTACT_PERMISSION);
+        FirebaseMessaging.getInstance().subscribeToTopic(user.getPhoneNumber().substring(2));
 
         valueEventListener = new ValueEventListener() {
             @Override
@@ -65,7 +67,6 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, "Main ACTIVITY", Toast.LENGTH_SHORT).show();
                         db.addChat(new Chat("SUHAIL",msg.getNumber()));
                         db.addMessage(new Chat("SUHAIL",msg.getNumber()),msg);
-
                     }
                     root.child("Chats").child(user.getPhoneNumber()).removeValue();
                 }
