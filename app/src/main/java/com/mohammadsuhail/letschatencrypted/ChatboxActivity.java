@@ -3,12 +3,19 @@ package com.mohammadsuhail.letschatencrypted;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.NotificationCompat;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -131,6 +138,14 @@ public class ChatboxActivity extends AppCompatActivity {
                             messageList.add(msg);
                             messageListAdapter.notifyDataSetChanged();
                             messageRecyclerView.smoothScrollToPosition(messageList.size() - 1);
+                        } else {
+                            Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                vibrator.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.EFFECT_DOUBLE_CLICK));
+                            } else {
+                                vibrator.vibrate(500);
+                            }
+                            addNotification(msg);
                         }
                     }
                     root.child("Chats").child(user.getPhoneNumber()).removeValue();
@@ -145,7 +160,22 @@ public class ChatboxActivity extends AppCompatActivity {
 
         root.child("Chats").child(user.getPhoneNumber()).addValueEventListener(valueEventListener);
     }
+    private void addNotification(Message msg) {
+        NotificationCompat.Builder builder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.ic_launcher_background)
+                        .setContentTitle(msg.getNumber())
+                        .setContentText(msg.getMessage());
 
+        Intent notificationIntent = new Intent(this, ChatboxActivity.class);
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setContentIntent(contentIntent);
+
+        // Add as notification
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        manager.notify(0, builder.build());
+    }
     private void sendNotificationToUser(String number,String message) throws JSONException {
         JSONObject mainObj = new JSONObject();
         mainObj.put("to","/topics/"+number.substring(2));

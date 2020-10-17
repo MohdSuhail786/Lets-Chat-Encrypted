@@ -49,7 +49,8 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatHolder> {
                 Intent intent = new Intent(context,ChatboxActivity.class);
                 intent.putExtra("name",chat.getName());
                 intent.putExtra("number",chat.getNumber());
-                ((Activity)view.getContext()).startActivity(intent);
+                view.getContext().startActivity(intent);
+                ((Activity) view.getContext()).finish();
             }
         });
         holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {

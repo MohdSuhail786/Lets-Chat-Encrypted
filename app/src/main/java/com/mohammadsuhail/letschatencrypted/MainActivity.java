@@ -4,13 +4,20 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.ViewPager;
 
 import android.Manifest;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.renderscript.Sampler;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -67,6 +74,13 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, "Main ACTIVITY", Toast.LENGTH_SHORT).show();
                         db.addChat(new Chat("SUHAIL",msg.getNumber()));
                         db.addMessage(new Chat("SUHAIL",msg.getNumber()),msg);
+                        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            vibrator.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.EFFECT_DOUBLE_CLICK));
+                        } else {
+                            vibrator.vibrate(500);
+                        }
+                        addNotification(msg);
                     }
                     root.child("Chats").child(user.getPhoneNumber()).removeValue();
                 }
@@ -86,7 +100,22 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
         root.child("Chats").child(user.getPhoneNumber()).removeEventListener(valueEventListener);
     }
+    private void addNotification(Message msg) {
+        NotificationCompat.Builder builder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.ic_launcher_background)
+                        .setContentTitle(msg.getNumber())
+                        .setContentText(msg.getMessage());
 
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setContentIntent(contentIntent);
+
+        // Add as notification
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        manager.notify(0, builder.build());
+    }
     @Override
     protected void onStart() {
         super.onStart();
@@ -134,9 +163,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if (requestCode == READ_CONTACT_PERMISSION) {
