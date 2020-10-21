@@ -32,11 +32,11 @@ public class ChatsFragment extends Fragment {
     public ChatsFragment() {
     }
 
-    ArrayList<Chat> chatlist = new ArrayList<>();
-    ChatAdapter listAdapter;
+    static ArrayList<Chat> chatlist = new ArrayList<>();
+    static ChatAdapter listAdapter;
     LinearLayoutManager layoutManager;
-    RecyclerView recyclerView;
-    DatabaseHandler db;
+    static RecyclerView recyclerView;
+    static DatabaseHandler db;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,6 +66,8 @@ public class ChatsFragment extends Fragment {
 
 
     }
-
-
+    public static void updateList(Chat chat) {
+        chatlist = db.getAllChats();
+        listAdapter.notifyDataSetChanged();
+    }
 }

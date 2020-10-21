@@ -1,6 +1,10 @@
 package com.mohammadsuhail.letschatencrypted;
 
+import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -19,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -33,14 +38,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.mohammadsuhail.letschatencrypted.SplashActivity.contactsList;
 
-public class ContactsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private static final int CONTACTS_LOADER_ID = 1;
+public class ContactsFragment extends Fragment {
+
+
     private ProgressBar progressBar;
-    Map<String, Boolean> namePhoneMap = new HashMap<String, Boolean>();
     private ContactAdapter listAdapter;
-    private static ArrayList<Contact> contactsList = new ArrayList<>();
+    private static ArrayList<Contact> contacts = new ArrayList<>();
     private RecyclerView recyclerView;
 
     public ContactsFragment() {
@@ -50,27 +56,60 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         progressBar = getActivity().findViewById(R.id.toolbar_progress_bar);
-
-//        getLoaderManager().initLoader(CONTACTS_LOADER_ID, null, this);
     }
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
+
         super.setUserVisibleHint(isVisibleToUser);
         if (isVisibleToUser) {
-            if(contactsList.size() == 0){
-                progressBar.setVisibility(View.VISIBLE);
-                getLoaderManager().initLoader(CONTACTS_LOADER_ID, null, this);
-
+            if (contacts.size() == 0)progressBar.setVisibility(View.VISIBLE);
+            recyclerView = getActivity().findViewById(R.id.myRecyclerView);
+            recyclerView.setHasFixedSize(true);
+            LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
+            recyclerView.setLayoutManager(layoutManager);
+            listAdapter = new ContactAdapter(contacts, getActivity().getApplicationContext());
+            recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
+            recyclerView.setAdapter(listAdapter);
+            if (contacts.size() == 0) {
+                if (isNetworkAvailable())
+                loadContacts();
+                else{
+                    Toast.makeText(getContext(), "Please connect to internet and restart your app", Toast.LENGTH_SHORT).show();
+                    progressBar.setVisibility(View.GONE);
+                }
             }
-            else {
-                recyclerView = getActivity().findViewById(R.id.myRecyclerView);
-                recyclerView.setHasFixedSize(true);
-                LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
-                recyclerView.setLayoutManager(layoutManager);
-                listAdapter = new ContactAdapter(contactsList,getActivity().getApplicationContext());
-                recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
-                recyclerView.setAdapter(listAdapter);
+
+        }
+    }
+
+    private void loadContacts() {
+        DatabaseReference root = FirebaseDatabase.getInstance().getReference();
+
+        for (Contact c : contactsList) {
+            String number = c.getNumber();
+            String name = c.getName();
+            if (isValid(number)) {
+
+                if (number.equals(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber()))
+                    continue;
+                final String finalNumber = number;
+                final String finalName = name;
+                root.child("Users").child(finalNumber).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.getValue() != null) {
+                            contacts.add(new Contact(finalName, finalNumber));
+                            listAdapter.notifyDataSetChanged();
+                        }
+                        progressBar.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
             }
         }
     }
@@ -80,80 +119,16 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
         return inflater.inflate(R.layout.fragment_contacts, container, false);
     }
 
-    @NonNull
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
-        if (id == CONTACTS_LOADER_ID) {
-            return contactsLoader();
-        }
-        return null;
-    }
-
-    @Override
-    public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
-        recyclerView = getActivity().findViewById(R.id.myRecyclerView);
-        recyclerView.setHasFixedSize(true);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
-        recyclerView.setLayoutManager(layoutManager);
-        listAdapter = new ContactAdapter(contactsList,getActivity().getApplicationContext());
-        recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
-        recyclerView.setAdapter(listAdapter);
-
-        contactsFromCursor(data);
-
-    }
-
-    @Override
-    public void onLoaderReset(@NonNull Loader<Cursor> loader) {
-    }
-
-    private  Loader<Cursor> contactsLoader() {
-        Uri contactsUri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI; // The content URI of the phone contacts
-        String selection = null;                                 //Selection criteria
-        String[] selectionArgs = {};                             //Selection criteria
-        String sortOrder = null;                                 //The sort order for the returned rows
-
-        return new CursorLoader(Objects.requireNonNull(getActivity()).getApplicationContext(), contactsUri, null, selection, selectionArgs, sortOrder);
-    }
-
-    private void contactsFromCursor(final Cursor cursor) {
-        DatabaseReference root = FirebaseDatabase.getInstance().getReference();
-
-        if (cursor.getCount() > 0) {
-            cursor.moveToFirst();
-
-            do {
-                String number = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-                if(isValid(number)) {
-                    number = number.replaceAll("\\s","");
-                    final String finalNumber = number;
-                    final String finalName = name;
-                    root.child("Users").child(finalNumber).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if(snapshot.getValue() != null) {
-//                                Toast.makeText(Objects.requireNonNull(getActivity()).getApplicationContext(), finalNumber, Toast.LENGTH_SHORT).show();
-                                if(!namePhoneMap.containsKey(finalNumber)){
-                                    contactsList.add(new Contact(finalName,finalNumber));
-                                    listAdapter.notifyDataSetChanged();
-                                }
-                                namePhoneMap.put(finalNumber,true);
-                                progressBar.setVisibility(View.GONE);
-                            }
-                            else progressBar.setVisibility(View.GONE);
-                        }
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
-                }
-            } while (cursor.moveToNext());
-        }
-    }
     boolean isValid(String number) {
-        return number!=null && !number.contains(".") && !number.contains("#") && !number.contains("$") && !number.contains("[") && !number.contains("]");
+        return number != null && !number.contains(".") && !number.contains("#") && !number.contains("$") && !number.contains("[") && !number.contains("]");
     }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
 
 }

@@ -12,6 +12,8 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;
@@ -51,6 +53,9 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+
+import static com.mohammadsuhail.letschatencrypted.MainActivity.unreadChat;
+import static com.mohammadsuhail.letschatencrypted.SplashActivity.nnHashmap;
 
 public class ChatboxActivity extends AppCompatActivity {
 
@@ -103,49 +108,59 @@ public class ChatboxActivity extends AppCompatActivity {
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String msg = message.getText().toString();
-                message.setText("");
-                String currentTime = getCurrentTime();
-                if (!msg.isEmpty()) {
-                    Message newMessage = new Message(msg, currentTime, "TO", currentChat.getNumber());
-                    db.addMessage(currentChat, newMessage);
-                    addToTop(currentChat);
-                    messageList.add(newMessage);
-                    messageListAdapter.notifyDataSetChanged();
-                    messageRecyclerView.smoothScrollToPosition(messageList.size() - 1);
-                    sendMessageToFirebase(newMessage);
-                    try {
-                        sendNotificationToUser(currentChat.getNumber(),newMessage.getMessage());
 
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        Toast.makeText(ChatboxActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                if (isNetworkAvailable()) {
+                    String msg = message.getText().toString();
+                    message.setText("");
+                    String currentTime = getCurrentTime();
+                    if (!msg.isEmpty()) {
+                        Message newMessage = new Message(msg, currentTime, "TO", currentChat.getNumber());
+                        db.addMessage(currentChat, newMessage);
+                        addToTop(currentChat);
+                        messageList.add(newMessage);
+                        messageListAdapter.notifyDataSetChanged();
+                        messageRecyclerView.smoothScrollToPosition(messageList.size() - 1);
+                        sendMessageToFirebase(newMessage);
+                        try {
+                            sendNotificationToUser(currentChat.getNumber(), newMessage.getMessage());
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Toast.makeText(ChatboxActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
                     }
+                }
+                else {
+                    Toast.makeText(ChatboxActivity.this, "Please connnect to internet", Toast.LENGTH_SHORT).show();
                 }
             }
         });
-
         valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    for (DataSnapshot s:snapshot.getChildren()) {
+                    for (DataSnapshot s : snapshot.getChildren()) {
                         Message msg = s.getValue(Message.class);
                         Toast.makeText(ChatboxActivity.this, "CHATBOX ACTIVITY", Toast.LENGTH_SHORT).show();
-                        db.addChat(new Chat("SUHAIL",msg.getNumber()));
-                        db.addMessage(new Chat("SUHAIL",msg.getNumber()),msg);
-                        if(msg.getNumber().equals(currentChat.getNumber())) {
+                        String getName = nnHashmap.get(msg.getNumber());
+                        if (getName == null) getName = msg.getNumber();
+                        Chat chat = new Chat(getName, msg.getNumber());
+                        db.addChat(chat);
+                        db.addMessage(chat, msg);
+                        if (msg.getNumber().equals(currentChat.getNumber())) {
                             messageList.add(msg);
                             messageListAdapter.notifyDataSetChanged();
                             messageRecyclerView.smoothScrollToPosition(messageList.size() - 1);
                         } else {
+                            unreadChat.put(chat.getNumber(), true);
+
                             Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                 vibrator.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.EFFECT_DOUBLE_CLICK));
                             } else {
                                 vibrator.vibrate(500);
                             }
-                            addNotification(msg);
+                            addNotification(msg, getName);
                         }
                     }
                     root.child("Chats").child(user.getPhoneNumber()).removeValue();
@@ -160,11 +175,12 @@ public class ChatboxActivity extends AppCompatActivity {
 
         root.child("Chats").child(user.getPhoneNumber()).addValueEventListener(valueEventListener);
     }
-    private void addNotification(Message msg) {
+
+    private void addNotification(Message msg, String name) {
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.ic_launcher_background)
-                        .setContentTitle(msg.getNumber())
+                        .setContentTitle(name)
                         .setContentText(msg.getMessage());
 
         Intent notificationIntent = new Intent(this, ChatboxActivity.class);
@@ -172,40 +188,34 @@ public class ChatboxActivity extends AppCompatActivity {
                 PendingIntent.FLAG_UPDATE_CURRENT);
         builder.setContentIntent(contentIntent);
 
-        // Add as notification
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         manager.notify(0, builder.build());
     }
-    private void sendNotificationToUser(String number,String message) throws JSONException {
+
+    private void sendNotificationToUser(String number, String message) throws JSONException {
         JSONObject mainObj = new JSONObject();
-        mainObj.put("to","/topics/"+number.substring(2));
+        mainObj.put("to", "/topics/" + number.substring(2));
         JSONObject notificationObj = new JSONObject();
-        notificationObj.put("title",number);
-        notificationObj.put("body",message);
-        mainObj.put("notification",notificationObj);
-
-        JSONObject extraData = new JSONObject();
-        extraData.put("number","123");
-        extraData.put("name","abc");
-
-        mainObj.put("data",extraData);
+        notificationObj.put("title", user.getDisplayName());
+        notificationObj.put("body", message);
+        mainObj.put("notification", notificationObj);
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, URL, mainObj, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
-                Toast.makeText(ChatboxActivity.this,"DONE", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ChatboxActivity.this, "DONE", Toast.LENGTH_SHORT).show();
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Toast.makeText(ChatboxActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
             }
-        }){
+        }) {
             @Override
             public Map<String, String> getHeaders() {
-                Map<String,String> header = new HashMap<>();
-                header.put("content-type","application/json");
-                header.put("authorization","key=AAAAPDK3g7E:APA91bHJ5lWCTQJ7QEMtLvoeekA5f12dbIqJb4WPQC36eW0IVx4smXEa6LmbIgMfpfi5xRtZudvahUBOX3pXhAI13TQK64laqsXHHW-nZeesaxVVD6r_j8vNB6kF-Gth9EdGLssdnoKh");
+                Map<String, String> header = new HashMap<>();
+                header.put("content-type", "application/json");
+                header.put("authorization", "key=AAAAPDK3g7E:APA91bHJ5lWCTQJ7QEMtLvoeekA5f12dbIqJb4WPQC36eW0IVx4smXEa6LmbIgMfpfi5xRtZudvahUBOX3pXhAI13TQK64laqsXHHW-nZeesaxVVD6r_j8vNB6kF-Gth9EdGLssdnoKh");
                 return header;
             }
         };
@@ -218,13 +228,9 @@ public class ChatboxActivity extends AppCompatActivity {
         root.child("Chats").child(user.getPhoneNumber()).removeEventListener(valueEventListener);
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
 
     private void sendMessageToFirebase(Message newMessage) {
-        Message myMessage = new Message(newMessage.getMessage(),newMessage.getTime(),"FROM",user.getPhoneNumber());
+        Message myMessage = new Message(newMessage.getMessage(), newMessage.getTime(), "FROM", user.getPhoneNumber());
         root.child("Chats").child(currentChat.getNumber()).push().setValue(myMessage);
     }
 
@@ -279,4 +285,10 @@ public class ChatboxActivity extends AppCompatActivity {
         return true;
     }
 
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
 }
