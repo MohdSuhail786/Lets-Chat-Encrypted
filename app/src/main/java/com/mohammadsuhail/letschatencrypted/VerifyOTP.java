@@ -36,10 +36,15 @@ import com.google.firebase.auth.UserInfo;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+
+import static com.mohammadsuhail.letschatencrypted.LoginActivity.profileUri;
 
 public class VerifyOTP extends AppCompatActivity {
     TextView textView;
@@ -48,8 +53,11 @@ public class VerifyOTP extends AppCompatActivity {
     ImageView crossImage;
     String phone_num;
     String user_name;
+    Uri profileImage;
     private FirebaseAuth mAuth;
     private DatabaseReference rootRef;
+    private StorageReference UserProfileImageRef;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,12 +71,13 @@ public class VerifyOTP extends AppCompatActivity {
         phone_num = getIntent().getStringExtra("phone_number");
         user_name = getIntent().getStringExtra("user_n");
         textView.setText(phone_num);
+        UserProfileImageRef = FirebaseStorage.getInstance().getReference().child("Profile Images");
+        profileImage = profileUri;
         sendVerificationCodeToUser(phone_num);
-
         crossImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(VerifyOTP.this,LoginActivity.class));
+                startActivity(new Intent(VerifyOTP.this, LoginActivity.class));
                 finish();
             }
         });
@@ -90,7 +99,7 @@ public class VerifyOTP extends AppCompatActivity {
         @Override
         public void onVerificationCompleted(@NonNull PhoneAuthCredential phoneAuthCredential) {
             String code = phoneAuthCredential.getSmsCode();
-            if(code!=null) {
+            if (code != null) {
                 pinView.setText(code);
                 verifyCode(code);
             }
@@ -109,7 +118,7 @@ public class VerifyOTP extends AppCompatActivity {
     };
 
     private void verifyCode(String code) {
-        PhoneAuthCredential credential = PhoneAuthProvider.getCredential(codeBySystem,code);
+        PhoneAuthCredential credential = PhoneAuthProvider.getCredential(codeBySystem, code);
         signInWithPhoneAuthCredential(credential);
     }
 
@@ -129,10 +138,39 @@ public class VerifyOTP extends AppCompatActivity {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
                                             if (task.isSuccessful()) {
-                                                Toast.makeText(VerifyOTP.this, user.getDisplayName(), Toast.LENGTH_SHORT).show();
-                                                rootRef.child("Users").child(Objects.requireNonNull(user.getPhoneNumber())).setValue(user.getDisplayName());
-                                                startActivity(new Intent(VerifyOTP.this,MainActivity.class));
-                                                finish();
+
+                                                if (profileImage != null) {
+                                                    final StorageReference filePath = UserProfileImageRef.child(user.getPhoneNumber() + ".jpg");
+                                                    final String[] downloadURL = new String[1];
+                                                    filePath.putFile(profileImage).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                                                            if (task.isSuccessful()) {
+
+                                                                filePath.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                                                    @Override
+                                                                    public void onComplete(@NonNull Task<Uri> task) {
+                                                                        downloadURL[0] = task.getResult().toString();
+                                                                        rootRef.child("Users").child(user.getPhoneNumber()).child("image").setValue(downloadURL[0]);
+                                                                    }
+                                                                });
+                                                                Toast.makeText(VerifyOTP.this, "Upload successful", Toast.LENGTH_SHORT).show();
+                                                                Toast.makeText(VerifyOTP.this, user.getDisplayName(), Toast.LENGTH_SHORT).show();
+                                                                rootRef.child("Users").child(Objects.requireNonNull(user.getPhoneNumber())).child("name").setValue(user.getDisplayName());
+
+                                                                startActivity(new Intent(VerifyOTP.this, MainActivity.class));
+                                                                finish();
+                                                            } else {
+                                                                Toast.makeText(VerifyOTP.this, "Profile not uploaded", Toast.LENGTH_SHORT).show();
+                                                            }
+                                                        }
+                                                    });
+                                                } else {
+                                                    Toast.makeText(VerifyOTP.this, user.getDisplayName(), Toast.LENGTH_SHORT).show();
+                                                    rootRef.child("Users").child(Objects.requireNonNull(user.getPhoneNumber())).setValue(user.getDisplayName());
+                                                    startActivity(new Intent(VerifyOTP.this, MainActivity.class));
+                                                    finish();
+                                                }
                                             }
                                         }
                                     });
@@ -145,9 +183,9 @@ public class VerifyOTP extends AppCompatActivity {
                 });
     }
 
-    public void callNextScreenFromOTP(View view){
+    public void callNextScreenFromOTP(View view) {
         String code = pinView.getText().toString();
-        if(!code.isEmpty()){
+        if (!code.isEmpty()) {
             verifyCode(code);
         }
     }

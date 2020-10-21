@@ -66,6 +66,7 @@ public class SplashActivity extends AppCompatActivity {
         if(firebaseUser == null) {
             Intent intent = new Intent(this,LoginActivity.class);
             startActivity(intent);
+            finish();
         } else {
             checkPermission(Manifest.permission.READ_CONTACTS, READ_CONTACT_PERMISSION);
         }

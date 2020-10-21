@@ -12,12 +12,12 @@
         android:padding="20dp"
         tools:context=".LoginActivity">
 
-        <ImageView
-            android:id="@+id/imageView"
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/userprofile_id"
             android:layout_width="100dp"
             android:layout_gravity="center"
             android:layout_height="100dp"
-            android:src="@drawable/ic_baseline_account_circle_24" />
+            android:src="@drawable/add_profile_img" />
 
         <TextView
             android:id="@+id/textView"

@@ -3,6 +3,15 @@ package com.mohammadsuhail.letschatencrypted;
 public class Chat {
     private String name;
     private String number;
+    private String imageurl = null;
+
+    public String getImageurl() {
+        return imageurl;
+    }
+
+    public void setImageurl(String imageurl) {
+        this.imageurl = imageurl;
+    }
 
     public Chat() {
     }

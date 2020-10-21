@@ -11,7 +11,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.ArrayList;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactHolder> {
     private ArrayList<Contact> contactsList;
@@ -46,12 +50,21 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactH
         // Set the data to the views here
         holder.setContactName(contact.getName());
         holder.setContactNumber(contact.getNumber());
+        if (contact.getImageurl()!=null) {
+            holder.setProfile(contact.getImageurl());
+        }
+        else {
+            holder.setProfile("");
+        }
+
         holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(), ChatboxActivity.class);
                 intent.putExtra("name",contact.getName());
                 intent.putExtra("number",contact.getNumber());
+                intent.putExtra("profileurl",contact.getImageurl());
+
                 view.getContext().startActivity(intent);
                 ((Activity)view.getContext()).finish();
             }
@@ -66,12 +79,14 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactH
 
         private TextView txtName;
         private TextView txtNumber;
+        private CircleImageView profile;
 
         public ContactHolder(View itemView) {
             super(itemView);
 
             txtName = itemView.findViewById(R.id.txt_name);
             txtNumber = itemView.findViewById(R.id.txt_number);
+            profile = itemView.findViewById(R.id.profileID);
         }
 
         public void setContactName(String name) {
@@ -80,6 +95,12 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactH
 
         public void setContactNumber(String number) {
             txtNumber.setText(number);
+        }
+        public void setProfile(String url) {
+            if (!url.equals(""))
+            Picasso.get().load(url).into(profile);
+            else
+                profile.setImageResource(R.drawable.ic_baseline_account_circle_24);
         }
     }
 }

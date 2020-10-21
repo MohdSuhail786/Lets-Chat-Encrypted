@@ -63,7 +63,7 @@ public class ContactsFragment extends Fragment {
 
         super.setUserVisibleHint(isVisibleToUser);
         if (isVisibleToUser) {
-            if (contacts.size() == 0)progressBar.setVisibility(View.VISIBLE);
+            if (contacts.size() == 0) progressBar.setVisibility(View.VISIBLE);
             recyclerView = getActivity().findViewById(R.id.myRecyclerView);
             recyclerView.setHasFixedSize(true);
             LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
@@ -73,8 +73,8 @@ public class ContactsFragment extends Fragment {
             recyclerView.setAdapter(listAdapter);
             if (contacts.size() == 0) {
                 if (isNetworkAvailable())
-                loadContacts();
-                else{
+                    loadContacts();
+                else {
                     Toast.makeText(getContext(), "Please connect to internet and restart your app", Toast.LENGTH_SHORT).show();
                     progressBar.setVisibility(View.GONE);
                 }
@@ -99,6 +99,14 @@ public class ContactsFragment extends Fragment {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if (snapshot.getValue() != null) {
+                            HashMap<String, String> hashMap = new HashMap<>();
+                            for (DataSnapshot sp : snapshot.getChildren()) {
+                                hashMap.put(sp.getKey(), sp.getValue().toString());
+                            }
+                            if (hashMap.get("image") != null)
+//                                Toast.makeText(getActivity(), ""+ hashMap.get("image"), Toast.LENGTH_SHORT).show();
+                                contacts.add(new Contact(finalName, finalNumber, hashMap.get("image")));
+                            else
                             contacts.add(new Contact(finalName, finalNumber));
                             listAdapter.notifyDataSetChanged();
                         }

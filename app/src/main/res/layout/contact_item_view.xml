@@ -13,8 +13,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <ImageView
-            android:id="@+id/imageView3"
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/profileID"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginStart="8dp"
@@ -42,8 +42,8 @@
             android:padding="5dp"
             android:textSize="18sp"
             android:text="sldkfjlsd"
-            app:layout_constraintStart_toEndOf="@+id/imageView3"
-            app:layout_constraintTop_toTopOf="@+id/imageView3" />
+            app:layout_constraintStart_toEndOf="@+id/profileID"
+            app:layout_constraintTop_toTopOf="@+id/profileID" />
 
         <ImageView
             android:id="@+id/dot_id"

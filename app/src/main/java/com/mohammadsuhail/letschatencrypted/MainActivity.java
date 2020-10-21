@@ -171,6 +171,8 @@ public class MainActivity extends AppCompatActivity {
         }
         if (item.getItemId() == R.id.profileOption) {
             Toast.makeText(this, "Loading your Profile ", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(MainActivity.this,ProfileActivity.class));
+            finish();
         }
         return true;
     }

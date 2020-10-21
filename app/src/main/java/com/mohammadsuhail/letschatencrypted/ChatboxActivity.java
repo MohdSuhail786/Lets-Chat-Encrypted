@@ -24,6 +24,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -41,6 +42,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.squareup.picasso.Picasso;
 
 
 import org.json.JSONException;
@@ -53,6 +55,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 import static com.mohammadsuhail.letschatencrypted.MainActivity.unreadChat;
 import static com.mohammadsuhail.letschatencrypted.SplashActivity.nnHashmap;
@@ -71,6 +75,8 @@ public class ChatboxActivity extends AppCompatActivity {
     private ValueEventListener valueEventListener;
     private RequestQueue requestQueue;
     private String URL = "https://fcm.googleapis.com/fcm/send";
+    private CircleImageView profileimg;
+    private TextView username;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,8 +85,12 @@ public class ChatboxActivity extends AppCompatActivity {
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         Toolbar toolbar = findViewById(R.id.chatboxtoolbar);
         setSupportActionBar(toolbar);
-        toolbar.setLogo(R.mipmap.ic_launcher_round);
         toolbar.setPadding(0, 4, 0, 4);
+        profileimg = findViewById(R.id.chatboxProfileid);
+        username = findViewById(R.id.chatboxusernameid);
+        String urlofimage = getIntent().getStringExtra("profileurl");
+        if (urlofimage == null) profileimg.setImageResource(R.drawable.ic_baseline_account_circle_24_white);
+        else Picasso.get().load(urlofimage).into(profileimg);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         requestQueue = Volley.newRequestQueue(this);
@@ -88,10 +98,11 @@ public class ChatboxActivity extends AppCompatActivity {
         user = FirebaseAuth.getInstance().getCurrentUser();
         currentChat = new Chat(getIntent().getStringExtra("name"), getIntent().getStringExtra("number"));
         db = new DatabaseHandler(this);
+        username.setText(currentChat.getName());
 
         addRecentMessagesToScreen();
 
-        Objects.requireNonNull(getSupportActionBar()).setTitle(currentChat.getName());
+        Objects.requireNonNull(getSupportActionBar()).setTitle("");
         this.overridePendingTransition(R.anim.enter_activity, R.anim.exit_activity);
 
         sendBtn = findViewById(R.id.sendButton);
