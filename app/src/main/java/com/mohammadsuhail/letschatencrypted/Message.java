@@ -5,15 +5,25 @@ public class Message {
     private String time;
     private String number;
     private String status;
+    private String senderimage;
 
     public Message() {
     }
 
-    public Message(String message, String time, String status, String number) {
+    public Message(String message, String time, String status, String number, String senderimage) {
         this.message = message;
         this.time = time;
         this.number = number;
         this.status = status;
+        this.senderimage = senderimage;
+    }
+
+    public String getSenderimage() {
+        return senderimage;
+    }
+
+    public void setSenderimage(String senderimage) {
+        this.senderimage = senderimage;
     }
 
     public String getMessage() {

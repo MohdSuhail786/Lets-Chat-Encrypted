@@ -19,8 +19,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/appBarLayout"
-        android:background="@drawable/chat_screen_background">
+        android:layout_below="@id/appBarLayout">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerviewMessageList"

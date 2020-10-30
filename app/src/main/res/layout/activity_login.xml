@@ -17,7 +17,15 @@
             android:layout_width="100dp"
             android:layout_gravity="center"
             android:layout_height="100dp"
-            android:src="@drawable/add_profile_img" />
+            android:src="@drawable/ic_baseline_account_circle_24" />
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/camera_icon"
+            android:id="@+id/cameraid"
+            android:layout_gravity="center"
+            android:layout_marginLeft="40dp"
+            android:layout_marginTop="-50dp"/>
 
         <TextView
             android:id="@+id/textView"

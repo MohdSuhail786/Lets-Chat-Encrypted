@@ -1,53 +1,33 @@
 package com.mohammadsuhail.letschatencrypted;
 
 import android.content.Context;
-import android.content.Intent;
-import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.Bundle;
-
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.loader.app.LoaderManager;
-import androidx.loader.content.CursorLoader;
-import androidx.loader.content.Loader;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import android.provider.ContactsContract;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-
-import static com.mohammadsuhail.letschatencrypted.SplashActivity.contactsList;
-
+import static com.mohammadsuhail.letschatencrypted.SplashActivity.internalContactList;
+import static com.mohammadsuhail.letschatencrypted.SplashActivity.signedUser;
 
 public class ContactsFragment extends Fragment {
 
-
-    private ProgressBar progressBar;
-    private ContactAdapter listAdapter;
-    private static ArrayList<Contact> contacts = new ArrayList<>();
-    private RecyclerView recyclerView;
+    private static ProgressBar progressBar;
+    private static ContactAdapter listAdapter;
+    public static ArrayList<Contact> contacts = new ArrayList<>();
+    private static RecyclerView recyclerView;
 
     public ContactsFragment() {
     }
@@ -60,18 +40,10 @@ public class ContactsFragment extends Fragment {
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
-
         super.setUserVisibleHint(isVisibleToUser);
         if (isVisibleToUser) {
-            if (contacts.size() == 0) progressBar.setVisibility(View.VISIBLE);
-            recyclerView = getActivity().findViewById(R.id.myRecyclerView);
-            recyclerView.setHasFixedSize(true);
-            LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
-            recyclerView.setLayoutManager(layoutManager);
-            listAdapter = new ContactAdapter(contacts, getActivity().getApplicationContext());
-            recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
-            recyclerView.setAdapter(listAdapter);
             if (contacts.size() == 0) {
+                progressBar.setVisibility(View.VISIBLE);
                 if (isNetworkAvailable())
                     loadContacts();
                 else {
@@ -83,34 +55,35 @@ public class ContactsFragment extends Fragment {
         }
     }
 
-    private void loadContacts() {
+    static void loadContacts() {
         DatabaseReference root = FirebaseDatabase.getInstance().getReference();
-
-        for (Contact c : contactsList) {
+        for (Contact c : internalContactList) {
             String number = c.getNumber();
             String name = c.getName();
-            if (isValid(number)) {
 
-                if (number.equals(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber()))
+            if (isValid(number)) {
+                if (number.equals(signedUser.getNumber()))
                     continue;
                 final String finalNumber = number;
                 final String finalName = name;
                 root.child("Users").child(finalNumber).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
+//                        Toast.makeText(getContext(), "Getting images", Toast.LENGTH_SHORT).show();
                         if (snapshot.getValue() != null) {
-                            HashMap<String, String> hashMap = new HashMap<>();
-                            for (DataSnapshot sp : snapshot.getChildren()) {
-                                hashMap.put(sp.getKey(), sp.getValue().toString());
+                            Contact contact;
+                            if (snapshot.getChildrenCount() == 2) {
+
+                                contact = snapshot.getValue(Contact.class);
+
+                                contacts.add(new Contact(finalName, finalNumber, contact.getImage(),0));
+                            } else {
+                                contacts.add(new Contact(finalName, finalNumber));
                             }
-                            if (hashMap.get("image") != null)
-//                                Toast.makeText(getActivity(), ""+ hashMap.get("image"), Toast.LENGTH_SHORT).show();
-                                contacts.add(new Contact(finalName, finalNumber, hashMap.get("image")));
-                            else
-                            contacts.add(new Contact(finalName, finalNumber));
                             listAdapter.notifyDataSetChanged();
+                            if (progressBar.getVisibility() == View.VISIBLE)
+                                progressBar.setVisibility(View.GONE);
                         }
-                        progressBar.setVisibility(View.GONE);
                     }
 
                     @Override
@@ -124,10 +97,12 @@ public class ContactsFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_contacts, container, false);
+        View view = inflater.inflate(R.layout.fragment_contacts, container, false);
+        initializeRecyclerView(view);
+        return view;
     }
 
-    boolean isValid(String number) {
+    static boolean isValid(String number) {
         return number != null && !number.contains(".") && !number.contains("#") && !number.contains("$") && !number.contains("[") && !number.contains("]");
     }
 
@@ -138,5 +113,14 @@ public class ContactsFragment extends Fragment {
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
+    private void initializeRecyclerView(View view) {
+        recyclerView = view.findViewById(R.id.myRecyclerView);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setHasFixedSize(true);
+        listAdapter = new ContactAdapter(contacts, getActivity());
+//            recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
+        recyclerView.setAdapter(listAdapter);
+    }
 
 }

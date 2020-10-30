@@ -13,12 +13,12 @@ import java.util.ArrayList;
 
 public class MessageListAdapter extends RecyclerView.Adapter {
     private Context context;
-    private ArrayList<Message> messagelist = new ArrayList<>();
+    private ArrayList<Message> messagelist;
 
 
-    public MessageListAdapter(Context context,ArrayList<Message> messageList) {
+    public MessageListAdapter(Context context,ArrayList<Message> ml) {
         this.context = context;
-        this.messagelist = messageList;
+        this.messagelist = ml;
     }
 
     @Override
@@ -59,7 +59,7 @@ public class MessageListAdapter extends RecyclerView.Adapter {
         return messagelist.size();
     }
 
-    private class ReceivedMessageHolder extends  RecyclerView.ViewHolder {
+    private static class ReceivedMessageHolder extends  RecyclerView.ViewHolder {
         TextView messageText, timeText;
         public ReceivedMessageHolder(@NonNull View itemView) {
             super(itemView);
@@ -73,7 +73,7 @@ public class MessageListAdapter extends RecyclerView.Adapter {
         }
     }
 
-    private class SendMessageHolder extends  RecyclerView.ViewHolder {
+    private static class SendMessageHolder extends  RecyclerView.ViewHolder {
         TextView messageText, timeText;
         public SendMessageHolder(@NonNull View itemView) {
             super(itemView);

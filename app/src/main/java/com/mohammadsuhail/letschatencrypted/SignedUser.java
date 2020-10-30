@@ -1,24 +1,14 @@
 package com.mohammadsuhail.letschatencrypted;
 
-public class Chat {
+public class SignedUser {
     private String name;
     private String number;
-    private String imageurl = null;
+    private String image;
 
-    public String getImageurl() {
-        return imageurl;
-    }
-
-    public void setImageurl(String imageurl) {
-        this.imageurl = imageurl;
-    }
-
-    public Chat() {
-    }
-
-    public Chat(String name, String number) {
+    public SignedUser(String name, String number, String image) {
         this.name = name;
         this.number = number;
+        this.image = image;
     }
 
     public String getName() {
@@ -35,5 +25,13 @@ public class Chat {
 
     public void setNumber(String number) {
         this.number = number;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 }

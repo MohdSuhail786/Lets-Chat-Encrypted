@@ -3,15 +3,17 @@ package com.mohammadsuhail.letschatencrypted;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.squareup.picasso.Picasso;
+import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 
@@ -19,10 +21,12 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactHolder> {
     private ArrayList<Contact> contactsList;
+    private Context context;
 
     // Counstructor for the Class
     public ContactAdapter(ArrayList<Contact> contactsList, Context context) {
         this.contactsList = contactsList;
+        this.context = context;
     }
 
     // This method creates views for the RecyclerView by inflating the layout
@@ -39,7 +43,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactH
 
     @Override
     public int getItemCount() {
-        return contactsList == null? 0: contactsList.size();
+        return contactsList == null ? 0 : contactsList.size();
     }
 
     // This method is called when binding the data to the views being created in RecyclerView
@@ -50,23 +54,19 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactH
         // Set the data to the views here
         holder.setContactName(contact.getName());
         holder.setContactNumber(contact.getNumber());
-        if (contact.getImageurl()!=null) {
-            holder.setProfile(contact.getImageurl());
+        if (!contact.getImage().equals("nil")) {
+            holder.setProfile(contact.getImage());
         }
-        else {
-            holder.setProfile("");
-        }
+
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
+            @Override
+            public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(), ChatboxActivity.class);
-                intent.putExtra("name",contact.getName());
-                intent.putExtra("number",contact.getNumber());
-                intent.putExtra("profileurl",contact.getImageurl());
-
+                intent.putExtra("name", contact.getName());
+                intent.putExtra("number", contact.getNumber());
+                intent.putExtra("profileurl", contact.getImage());
                 view.getContext().startActivity(intent);
-                ((Activity)view.getContext()).finish();
             }
 
         });
@@ -75,7 +75,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactH
     }
 
     // This is your ViewHolder class that helps to populate data to the view
-    public static class ContactHolder extends RecyclerView.ViewHolder {
+    public class ContactHolder extends RecyclerView.ViewHolder {
 
         private TextView txtName;
         private TextView txtNumber;
@@ -96,11 +96,13 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactH
         public void setContactNumber(String number) {
             txtNumber.setText(number);
         }
+
         public void setProfile(String url) {
-            if (!url.equals(""))
-            Picasso.get().load(url).into(profile);
-            else
-                profile.setImageResource(R.drawable.ic_baseline_account_circle_24);
+            if (!url.equals("")) {
+                Glide.with(context).load(Uri.parse(url)).into(profile);
+//                Picasso.get().load(url).into(profile);
+            }
+//                profile.setImageResource(R.drawable.ic_baseline_account_circle_24);
         }
     }
 }

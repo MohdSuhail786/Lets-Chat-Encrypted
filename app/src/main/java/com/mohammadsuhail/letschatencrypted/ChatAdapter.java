@@ -1,36 +1,40 @@
 package com.mohammadsuhail.letschatencrypted;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
+import android.provider.ContactsContract;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.google.android.gms.auth.api.signin.internal.Storage;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.squareup.picasso.Picasso;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-import static com.mohammadsuhail.letschatencrypted.MainActivity.unreadChat;
-
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatHolder> {
-    private ArrayList<Chat> chatlist;
+    private ArrayList<Contact> chatlist;
     private Context context;
 
-    public ChatAdapter(ArrayList<Chat> chatList, Context c) {
+    public ChatAdapter(ArrayList<Contact> chatList, Context c) {
         this.chatlist = chatList;
         this.context = c;
     }
@@ -47,18 +51,13 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatHolder> {
     @RequiresApi(api = Build.VERSION_CODES.P)
     @Override
     public void onBindViewHolder(@NonNull final ChatHolder holder, int position) {
-
-        final Chat chat = chatlist.get(position);
-        holder.setChatName(chat.getName());
-        holder.setChatNumber(chat.getNumber());
-        if (holder.isUnreadChat(chat)) holder.dot.setVisibility(View.VISIBLE);
-        holder.setImageView("");
-        FirebaseDatabase.getInstance().getReference().child("Users").child(chat.getNumber()).child("image").addListenerForSingleValueEvent(new ValueEventListener() {
+        Contact contact = chatlist.get(position);
+        holder.txtName.setText(contact.getName());
+        holder.txtNumber.setText(contact.getNumber());
+        FirebaseDatabase.getInstance().getReference().child("Users").child(contact.getNumber()).child("image").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Toast.makeText(context, ""+snapshot.getValue(), Toast.LENGTH_SHORT).show();
-                if (snapshot.getValue()!=null) {
-                    chat.setImageurl(snapshot.getValue().toString());
+                if (snapshot.exists()) {
                     holder.setImageView(snapshot.getValue().toString());
                 }
             }
@@ -69,32 +68,39 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatHolder> {
             }
         });
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(context,ChatboxActivity.class);
-                intent.putExtra("name",chat.getName());
-                intent.putExtra("number",chat.getNumber());
-                intent.putExtra("profileurl",chat.getImageurl());
-                holder.dot.setVisibility(View.INVISIBLE);
-                unreadChat.remove(chat.getNumber());
-                view.getContext().startActivity(intent);
-                ((Activity) view.getContext()).finish();
+        if (contact.getUnread() == 1) holder.dot.setVisibility(View.VISIBLE);
+
+
+        holder.itemView.setOnClickListener(view -> {
+
+            Intent intent = new Intent(context, ChatboxActivity.class);
+            intent.putExtra("name", contact.getName());
+            intent.putExtra("number", contact.getNumber());
+            intent.putExtra("profileurl", contact.getImage());
+            holder.dot.setVisibility(View.INVISIBLE);
+            DatabaseHandler db = new DatabaseHandler(context);
+            db.removeUnread(contact);
+            ArrayList<Contact> temp = db.getAllChats();
+            for (Contact c:temp) {
+                Log.i("xxxx",c.getUnread()+ " D");
             }
+            view.getContext().startActivity(intent);
         });
+
     }
 
     @Override
     public int getItemCount() {
-        return chatlist == null? 0: chatlist.size();
+        return chatlist.size();
     }
 
-    public static class ChatHolder extends RecyclerView.ViewHolder {
+    public class ChatHolder extends RecyclerView.ViewHolder {
 
-        private TextView txtName;
+        TextView txtName;
         private TextView txtNumber;
         private CircleImageView imageView;
         private ImageView dot;
+
         public ChatHolder(View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.profileID);
@@ -102,14 +108,9 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatHolder> {
             txtNumber = itemView.findViewById(R.id.txt_number);
             dot = itemView.findViewById(R.id.dot_id);
         }
-        public void setImageView(String url) { if (!url.equals("")) Picasso.get().load(url).into(imageView); else imageView.setImageResource(R.drawable.ic_baseline_account_circle_24);
+
+        public void setImageView(String url) {
+            if (!url.equals("nil")) Glide.with(context).load(Uri.parse(url)).into(imageView);
         }
-        public void setChatName(String name) {
-            txtName.setText(name);
-        }
-        public void setChatNumber(String number) {
-            txtNumber.setText(number);
-        }
-        public boolean isUnreadChat(Chat chat) { if (unreadChat.get(chat.getNumber()) !=null) return true; return false;}
     }
 }

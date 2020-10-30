@@ -25,7 +25,8 @@
             </intent-filter>
         </service>
         -->
-        <activity android:name=".ChatboxActivity" />
+        <activity
+            android:name=".ChatboxActivity"/>
         <activity android:name=".LoginActivity" />
         <activity android:name=".VerifyOTP" />
         <activity android:name=".MainActivity" />

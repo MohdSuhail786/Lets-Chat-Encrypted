@@ -12,23 +12,29 @@ import androidx.viewpager.widget.ViewPager;
 import android.Manifest;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.provider.ContactsContract;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.BulletSpan;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -43,109 +49,57 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 
+import static com.mohammadsuhail.letschatencrypted.ChatsFragment.chatlist;
+import static com.mohammadsuhail.letschatencrypted.ContactsFragment.contacts;
+import static com.mohammadsuhail.letschatencrypted.ContactsFragment.loadContacts;
 import static com.mohammadsuhail.letschatencrypted.SplashActivity.nnHashmap;
+import static com.mohammadsuhail.letschatencrypted.SplashActivity.signedUser;
 
 
 public class MainActivity extends AppCompatActivity {
     private FirebaseUser currentUser;
     private FirebaseAuth firebaseAuth;
-    private ValueEventListener valueEventListener;
     private DatabaseHandler db;
     private DatabaseReference root;
     private FirebaseUser user;
-    static HashMap<String, Boolean> unreadChat = new HashMap<>();
-
+    private FloatingActionButton feedBackBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        addToolBar();
+
+        setViewPagerWithTabLayout();
+
         firebaseAuth = FirebaseAuth.getInstance();
         currentUser = firebaseAuth.getCurrentUser();
         user = FirebaseAuth.getInstance().getCurrentUser();
         root = FirebaseDatabase.getInstance().getReference();
         db = new DatabaseHandler(MainActivity.this);
 
-        Toolbar toolbar = findViewById(R.id.mainToolBar);
-        setSupportActionBar(toolbar);
-        toolbar.setPadding(10, 0, 0, 0);
-        Objects.requireNonNull(getSupportActionBar()).setTitle("Lets Chat");
-        ViewPager viewPager = findViewById(R.id.mainTabsPager);
-        viewPager.setAdapter(new TabsAdapter(getSupportFragmentManager()));
-        TabLayout tabLayout = findViewById(R.id.mainTabs);
-        tabLayout.setupWithViewPager(viewPager);
+        Toast.makeText(this, signedUser.getNumber() + " " + signedUser.getName() + " " + signedUser.getImage(), Toast.LENGTH_SHORT).show();
 
         FirebaseMessaging.getInstance().subscribeToTopic(user.getPhoneNumber().substring(2));
 
-        valueEventListener = new ValueEventListener() {
-            @RequiresApi(api = Build.VERSION_CODES.P)
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    for (DataSnapshot s : snapshot.getChildren()) {
-                        Message msg = s.getValue(Message.class);
-                        Toast.makeText(MainActivity.this, "Main ACTIVITY", Toast.LENGTH_SHORT).show();
-                        assert msg != null;
-                        String getName = nnHashmap.get(msg.getNumber());
-                        if (getName == null) getName = msg.getNumber();
-                        Chat chat = new Chat(getName, msg.getNumber());
-                        db.deleteChat(chat);
-                        db.addChat(chat);
-
-                        db.addMessage(chat, msg);
-                        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            vibrator.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.EFFECT_DOUBLE_CLICK));
-                        } else {
-                            vibrator.vibrate(500);
-                        }
-                        unreadChat.put(chat.getNumber(),true);
-                        ChatsFragment.updateList(chat);
-                        addNotification(msg, getName);
-                    }
-                    root.child("Chats").child(user.getPhoneNumber()).removeValue();
-                }
+        feedBackBtn = findViewById(R.id.floatingActionButton);
+        feedBackBtn.setOnClickListener(view -> {
+            Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+            emailIntent.setData(Uri.parse("mailto:thesuhailansari786246@gmail.com" + "&subject=" + Uri.encode("Feedback from : "+signedUser.getName() +"( "+signedUser.getNumber() +" )") ));
+            try {
+                startActivity(emailIntent);
+            } catch (ActivityNotFoundException e) {
+                //TODO: Handle case where no email app is available
             }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        };
-
-        root.child("Chats").child(user.getPhoneNumber()).addValueEventListener(valueEventListener);
+        });
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        root.child("Chats").child(user.getPhoneNumber()).removeEventListener(valueEventListener);
-    }
-
-    private void addNotification(Message msg, String name) {
-        NotificationCompat.Builder builder =
-                new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.ic_launcher_background)
-                        .setContentTitle(name)
-                        .setContentText(msg.getMessage());
-
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-        builder.setContentIntent(contentIntent);
-
-        // Add as notification
-        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        manager.notify(0, builder.build());
-    }
 
     @Override
     protected void onStart() {
         super.onStart();
-        if (currentUser == null) {
-            startActivity(new Intent(MainActivity.this, LoginActivity.class));
-            finish();
-        }
+        Toast.makeText(this, "START", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -158,23 +112,39 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         super.onOptionsItemSelected(item);
-        if (item.getItemId() == R.id.settingsOption) {
-
+        if (item.getItemId() == R.id.refreshOption) {
+            contacts.clear();
+            loadContacts();
         }
         if (item.getItemId() == R.id.logoutOptions) {
             firebaseAuth.signOut();
+            DatabaseHandler db = new DatabaseHandler(MainActivity.this);
+            db.dropTables();
             startActivity(new Intent(MainActivity.this, LoginActivity.class));
             finish();
         }
         if (item.getItemId() == R.id.aboutOption) {
-
+            Snackbar.make(getCurrentFocus(), "Developed and maintained by MSAF", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
         }
         if (item.getItemId() == R.id.profileOption) {
-            Toast.makeText(this, "Loading your Profile ", Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(MainActivity.this,ProfileActivity.class));
-            finish();
+            startActivity(new Intent(MainActivity.this, ProfileActivity.class));
         }
         return true;
+    }
+
+    private void addToolBar() {
+        Toolbar toolbar = findViewById(R.id.mainToolBar);
+        setSupportActionBar(toolbar);
+        toolbar.setPadding(10, 0, 0, 0);
+        Objects.requireNonNull(getSupportActionBar()).setTitle("Lets Chat");
+    }
+
+    private void setViewPagerWithTabLayout() {
+        ViewPager viewPager = findViewById(R.id.mainTabsPager);
+        viewPager.setAdapter(new TabsAdapter(getSupportFragmentManager()));
+        TabLayout tabLayout = findViewById(R.id.mainTabs);
+        tabLayout.setupWithViewPager(viewPager);
     }
 
 }

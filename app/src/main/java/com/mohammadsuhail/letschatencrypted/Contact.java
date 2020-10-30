@@ -3,13 +3,25 @@ package com.mohammadsuhail.letschatencrypted;
 public class Contact {
     private String name;
     private String number;
-    private String imageurl = null;
+    private String image = null;
+    private int unread;
 
-    public Contact(String name, String number,String imageurl) {
+    public int getUnread() {
+        return unread;
+    }
+
+    public void setUnread(int unread) {
+        this.unread = unread;
+    }
+
+    public Contact(String name, String number, String imageurl, int unread) {
         this.name = name;
         this.number = number;
-        this.imageurl = imageurl;
+        this.image = imageurl;
+        this.unread = unread;
     }
+
+    public Contact(){}
 
     public Contact(String name, String number) {
         this.name = name;
@@ -32,11 +44,11 @@ public class Contact {
         this.number = number;
     }
 
-    public String getImageurl() {
-        return imageurl;
+    public String getImage() {
+        return image;
     }
 
-    public void setImageurl(String imageurl) {
-        this.imageurl = imageurl;
+    public void setImage(String imageurl) {
+        this.image = imageurl;
     }
 }
