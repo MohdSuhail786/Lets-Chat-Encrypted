@@ -1,8 +1,6 @@
 package com.mohammadsuhail.letschatencrypted;
 
-import android.content.Context;
 import android.os.Bundle;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -10,32 +8,24 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListAdapter;
-import android.widget.Toast;
-
-import com.bumptech.glide.disklrucache.DiskLruCache;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
 import java.util.ArrayList;
-
-import static com.mohammadsuhail.letschatencrypted.ChatboxActivity.messageList;
 import static com.mohammadsuhail.letschatencrypted.SplashActivity.nnHashmap;
 import static com.mohammadsuhail.letschatencrypted.SplashActivity.signedUser;
 
 
 public class ChatsFragment extends Fragment {
-    RecyclerView recyclerView;
-    ChatAdapter listAdapter;
-    ValueEventListener valueEventListener;
+    private RecyclerView recyclerView;
+    private ChatAdapter listAdapter;
+    private ValueEventListener valueEventListener;
     public ChatsFragment() {
     }
 
@@ -73,12 +63,10 @@ public class ChatsFragment extends Fragment {
     }
 
     private void getChatList(View view) {
-        Log.i("xxxx", "getMessage");
         initializeRecyclerView(view);
     }
 
     private void joinValueEventListener() {
-        Log.i("xxxx","JOIN VALUEEVENT LISTENER");
         DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
         valueEventListener = new ValueEventListener() {
             @Override
@@ -113,6 +101,7 @@ public class ChatsFragment extends Fragment {
         };
         FirebaseDatabase.getInstance().getReference().child("Chats").child(signedUser.getNumber()).addValueEventListener(valueEventListener);
     }
+
     public void removeValueEventListener() {
         FirebaseDatabase.getInstance().getReference().child("Chats").child(signedUser.getNumber()).removeEventListener(valueEventListener);
     }
@@ -126,8 +115,6 @@ public class ChatsFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        Toast.makeText(getContext(), "START CHATSFRAGMENT", Toast.LENGTH_SHORT).show();
-        Log.i("xxxx","START CHATFRAA");
         joinValueEventListener();
         populateRecyclerView();
     }

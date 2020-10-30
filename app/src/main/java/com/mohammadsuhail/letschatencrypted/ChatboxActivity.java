@@ -1,7 +1,6 @@
 package com.mohammadsuhail.letschatencrypted;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -24,8 +23,6 @@ import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
@@ -61,7 +58,7 @@ public class ChatboxActivity extends AppCompatActivity {
     private EditText message;
     private RecyclerView messageRecyclerView;
     private MessageListAdapter messageListAdapter;
-    ValueEventListener valueEventListener;
+    private ValueEventListener valueEventListener;
     public static ArrayList<Message> messageList = new ArrayList<>();
     private DatabaseReference root;
     private RequestQueue requestQueue;
@@ -76,8 +73,6 @@ public class ChatboxActivity extends AppCompatActivity {
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         setContentView(R.layout.activity_chat_box);
         this.overridePendingTransition(R.anim.enter_activity, R.anim.exit_activity);
-        Log.i("xxxx", signedUser.getNumber());
-        Toast.makeText(this, "" + signedUser.getName(), Toast.LENGTH_SHORT).show();
         FirebaseMessaging.getInstance().subscribeToTopic(signedUser.getNumber().substring(2));
 
         getWindow().setBackgroundDrawable(getResources().getDrawable(R.drawable.chat_screen_background));
@@ -96,18 +91,27 @@ public class ChatboxActivity extends AppCompatActivity {
                 message.setText("");
                 String currentTime = getCurrentTime();
                 if (!msg.isEmpty()) {
-                    Message newMessage = new Message(msg, currentTime, "TO", signedUser.getNumber(), signedUser.getImage());
-                    db.addMessage(receiver, newMessage);
+
+                    Message simpleMessage = new Message(msg, currentTime, "TO", signedUser.getNumber(), signedUser.getImage());
+
+                    try {
+                        msg = AES.encrypt(msg);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    Message encryptedMessage = new Message(msg, currentTime, "TO", signedUser.getNumber(), signedUser.getImage());
+                    db.addMessage(receiver, encryptedMessage);
 
                     addToTop(receiver);
-                    messageList.add(newMessage);
+                    messageList.add(simpleMessage);
                     messageListAdapter.notifyDataSetChanged();
                     messageRecyclerView.smoothScrollToPosition(messageList.size() - 1);
 
-                    sendMessageToFirebase(newMessage);
+                    sendMessageToFirebase(encryptedMessage);
 
                     try {
-                        sendNotificationToUser(receiver.getNumber(), newMessage.getMessage());
+                        sendNotificationToUser(receiver.getNumber(), encryptedMessage.getMessage());
 
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -131,12 +135,8 @@ public class ChatboxActivity extends AppCompatActivity {
         mainObj.put("notification", notificationObj);
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, URL, mainObj, response ->
-                Toast.makeText(ChatboxActivity.this, "DONE", Toast.LENGTH_SHORT).show(), new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(ChatboxActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        }) {
+        {
+        }, error -> Toast.makeText(ChatboxActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show()) {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> header = new HashMap<>();
@@ -148,8 +148,8 @@ public class ChatboxActivity extends AppCompatActivity {
         requestQueue.add(request);
     }
 
-    private void sendMessageToFirebase(Message newMessage) {
-        root.child("Chats").child(receiver.getNumber()).push().setValue(newMessage);
+    private void sendMessageToFirebase(Message encryptedMessage) {
+        root.child("Chats").child(receiver.getNumber()).push().setValue(encryptedMessage);
     }
 
     private void addRecentMessagesToScreen() {
@@ -272,13 +272,17 @@ public class ChatboxActivity extends AppCompatActivity {
 
 
                         if (receiver.getNumber().equals(msg.getNumber())) {
+                            db.addChat(new Contact(getName, msg.getNumber(), msg.getSenderimage(), 0));
+                            db.addMessage(new Contact(getName, msg.getNumber(), msg.getSenderimage(), 0), msg);
+                            try {
+                                msg.setMessage(AES.decrypt(msg.getMessage()));
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                             messageList.add(msg);
                             messageListAdapter.notifyDataSetChanged();
                             messageRecyclerView.smoothScrollToPosition(messageList.size() - 1);
-                            db.addChat(new Contact(getName, msg.getNumber(), msg.getSenderimage(), 0));
-                            db.addMessage(new Contact(getName, msg.getNumber(), msg.getSenderimage(), 0), msg);
-                        }
-                        else {
+                        } else {
                             db.addChat(new Contact(getName, msg.getNumber(), msg.getSenderimage(), 1));
                             db.addMessage(new Contact(getName, msg.getNumber(), msg.getSenderimage(), 1), msg);
                         }

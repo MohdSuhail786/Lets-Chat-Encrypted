@@ -6,8 +6,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -31,7 +29,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         this.context = context;
-        //3rd argument to be passed is CursorFactory instance
     }
 
     @Override
@@ -108,13 +105,18 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                     1 - name
                     6 - Status
                 */
-                Message message = new Message(cursor.getString(4), cursor.getString(5), cursor.getString(6), cursor.getString(0),cursor.getString(2));
+                String msg = "";
+                try {
+                     msg = AES.decrypt(cursor.getString(4));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                Message message = new Message(msg, cursor.getString(5), cursor.getString(6), cursor.getString(0),cursor.getString(2));
                 list.add(message);
             } while (cursor.moveToNext());
         }
         return list;
     }
-
 
     public void deleteChat(Contact contact) {
         SQLiteDatabase db = this.getWritableDatabase();

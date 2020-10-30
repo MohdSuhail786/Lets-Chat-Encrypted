@@ -1,6 +1,6 @@
 package com.mohammadsuhail.letschatencrypted;
 
-import android.app.Activity;
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -8,35 +8,25 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.Glide;
-
 import java.util.ArrayList;
-
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactHolder> {
     private ArrayList<Contact> contactsList;
     private Context context;
 
-    // Counstructor for the Class
     public ContactAdapter(ArrayList<Contact> contactsList, Context context) {
         this.contactsList = contactsList;
         this.context = context;
     }
 
-    // This method creates views for the RecyclerView by inflating the layout
-    // Into the viewHolders which helps to display the items in the RecyclerView
     @NonNull
     @Override
     public ContactHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
-
-        // Inflate the layout view you have created for the list rows here
         View view = layoutInflater.inflate(R.layout.contact_item_view, parent, false);
         return new ContactHolder(view);
     }
@@ -46,12 +36,11 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactH
         return contactsList == null ? 0 : contactsList.size();
     }
 
-    // This method is called when binding the data to the views being created in RecyclerView
+
     @Override
     public void onBindViewHolder(@NonNull ContactHolder holder, final int position) {
         final Contact contact = contactsList.get(position);
 
-        // Set the data to the views here
         holder.setContactName(contact.getName());
         holder.setContactNumber(contact.getNumber());
         if (!contact.getImage().equals("nil")) {
@@ -74,7 +63,6 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactH
         // make sure you pass down the listner or make the Data members of the viewHolder public
     }
 
-    // This is your ViewHolder class that helps to populate data to the view
     public class ContactHolder extends RecyclerView.ViewHolder {
 
         private TextView txtName;

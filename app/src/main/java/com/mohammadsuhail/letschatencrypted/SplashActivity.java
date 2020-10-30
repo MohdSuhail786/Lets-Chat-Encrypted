@@ -1,13 +1,10 @@
 package com.mohammadsuhail.letschatencrypted;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-
 import android.Manifest;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -15,12 +12,7 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.CountDownTimer;
-import android.os.Handler;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
 import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.WindowManager;
@@ -29,20 +21,14 @@ import android.view.animation.AnimationUtils;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.google.firebase.FirebaseError;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import static com.mohammadsuhail.letschatencrypted.ChatboxActivity.messageList;
 
 public class SplashActivity extends AppCompatActivity {
 
@@ -124,16 +110,6 @@ public class SplashActivity extends AppCompatActivity {
                 checkPermission(Manifest.permission.READ_CONTACTS, READ_CONTACT_PERMISSION);
             }
         }
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
     }
 
     private void initializeAnimations() {

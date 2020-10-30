@@ -2,7 +2,6 @@ package com.mohammadsuhail.letschatencrypted;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -10,12 +9,10 @@ import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
-
 import com.google.android.material.textfield.TextInputEditText;
 import com.hbb20.CountryCodePicker;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
-
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class LoginActivity extends AppCompatActivity {

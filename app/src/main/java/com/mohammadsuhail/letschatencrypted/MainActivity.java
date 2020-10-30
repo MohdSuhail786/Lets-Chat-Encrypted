@@ -1,60 +1,27 @@
 package com.mohammadsuhail.letschatencrypted;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
-import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.ViewPager;
-
-import android.Manifest;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
-import android.provider.ContactsContract;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.style.BulletSpan;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Toast;
-
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Objects;
-
-import static com.mohammadsuhail.letschatencrypted.ChatsFragment.chatlist;
 import static com.mohammadsuhail.letschatencrypted.ContactsFragment.contacts;
 import static com.mohammadsuhail.letschatencrypted.ContactsFragment.loadContacts;
-import static com.mohammadsuhail.letschatencrypted.SplashActivity.nnHashmap;
 import static com.mohammadsuhail.letschatencrypted.SplashActivity.signedUser;
-
 
 public class MainActivity extends AppCompatActivity {
     private FirebaseUser currentUser;
@@ -79,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
         root = FirebaseDatabase.getInstance().getReference();
         db = new DatabaseHandler(MainActivity.this);
 
-        Toast.makeText(this, signedUser.getNumber() + " " + signedUser.getName() + " " + signedUser.getImage(), Toast.LENGTH_SHORT).show();
 
         FirebaseMessaging.getInstance().subscribeToTopic(user.getPhoneNumber().substring(2));
 
@@ -93,13 +59,6 @@ public class MainActivity extends AppCompatActivity {
                 //TODO: Handle case where no email app is available
             }
         });
-    }
-
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        Toast.makeText(this, "START", Toast.LENGTH_SHORT).show();
     }
 
     @Override

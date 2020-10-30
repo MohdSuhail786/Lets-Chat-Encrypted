@@ -5,7 +5,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.NotificationCompat;
-
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -16,7 +15,6 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.bumptech.glide.Glide;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -41,7 +39,7 @@ public class ProfileActivity extends AppCompatActivity {
     private ImageView camera;
     private TextView userNameProfile;
     private TextView userNumProfile;
-    ValueEventListener valueEventListener;
+    private ValueEventListener valueEventListener;
     private DatabaseReference rootRef;
     private StorageReference UserProfileImageRef;
 
@@ -94,23 +92,6 @@ public class ProfileActivity extends AppCompatActivity {
         return true;
     }
 
-    private void addNotification(Message msg, String name) {
-        NotificationCompat.Builder builder =
-                new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.ic_launcher_background)
-                        .setContentTitle(name)
-                        .setContentText(msg.getMessage());
-
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-        builder.setContentIntent(contentIntent);
-
-        // Add as notification
-        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        manager.notify(0, builder.build());
-    }
-
     private void addTitleBar() {
         Toolbar toolbar = findViewById(R.id.profileToolBar);
         setSupportActionBar(toolbar);
@@ -142,7 +123,7 @@ public class ProfileActivity extends AppCompatActivity {
             rootRef.child("Users").child(signedUser.getNumber()).child("image").setValue(downloadURL);
             signedUser.setImage(downloadURL);
         });
-        Toast.makeText(ProfileActivity.this, "Profile Imgage Changed", Toast.LENGTH_SHORT).show();
+        Toast.makeText(ProfileActivity.this, "Profile Changed", Toast.LENGTH_SHORT).show();
     }
 
 
