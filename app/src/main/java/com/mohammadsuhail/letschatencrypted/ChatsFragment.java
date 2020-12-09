@@ -72,17 +72,12 @@ public class ChatsFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    Log.i("xxxx","CALLED");
                     for (DataSnapshot s : snapshot.getChildren()) {
                         Message msg = s.getValue(Message.class);
                         assert msg != null;
                         msg.setStatus("FROM");
-                        Log.i("xxxx", "CHATSFRAGMENT");
                         String getName = nnHashmap.get(msg.getNumber());
                         if (getName == null) getName = msg.getNumber();
-                        Log.i("xxxx", getName);
-                        Log.i("xxxx", msg.getMessage());
-                        Log.i("xxxx",msg.getNumber());
                         DatabaseHandler db = new DatabaseHandler(getContext());
                         db.deleteChat(new Contact(getName,msg.getNumber(),msg.getSenderimage(),0));
                         db.addChat(new Contact(getName,msg.getNumber(),msg.getSenderimage(),1));

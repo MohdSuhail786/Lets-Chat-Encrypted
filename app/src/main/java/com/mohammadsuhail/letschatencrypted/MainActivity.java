@@ -10,6 +10,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
@@ -56,7 +58,8 @@ public class MainActivity extends AppCompatActivity {
             try {
                 startActivity(emailIntent);
             } catch (ActivityNotFoundException e) {
-                //TODO: Handle case where no email app is available
+                //TODO: Handle case where no email app is
+                Toast.makeText(this, "No Email app is available", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -82,10 +85,12 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(MainActivity.this, LoginActivity.class));
             finish();
         }
+
         if (item.getItemId() == R.id.aboutOption) {
             Snackbar.make(getCurrentFocus(), "Developed and maintained by MSAF", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
         }
+
         if (item.getItemId() == R.id.profileOption) {
             startActivity(new Intent(MainActivity.this, ProfileActivity.class));
         }

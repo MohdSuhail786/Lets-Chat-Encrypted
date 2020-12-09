@@ -99,9 +99,9 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:fontFamily="cursive"
-            android:transitionName="myname_logo"
             android:text="MSAF"
             android:textColor="#FFB701"
-            android:textSize="24sp" />
+            android:textSize="24sp"
+            android:transitionName="myname_logo" />
     </RelativeLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -71,7 +71,6 @@ public class SplashActivity extends AppCompatActivity {
     void getAllContacts() {
         Uri uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
         String selection = ContactsContract.Contacts.HAS_PHONE_NUMBER;
-        String[] projection = {ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME};
         Cursor cursor = getContentResolver().query(uri, null, selection, null, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
         assert cursor != null;
         cursor.moveToFirst();
@@ -132,7 +131,6 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     public void setSignedUser() {
-        Log.i("xxxx", "Set Signed User");
         FirebaseDatabase.getInstance().getReference().child("Users").child(firebaseUser.getPhoneNumber()).child("image").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {

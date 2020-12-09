@@ -15,18 +15,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ProfileActivity"></activity>
-        <!--
-               <service
-            android:name=".MyFirebaseMessagingService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
-        -->
-        <activity
-            android:name=".ChatboxActivity"/>
+        <activity android:name=".ProfileActivity" />
+        <activity android:name=".ChatboxActivity"/>
         <activity android:name=".LoginActivity" />
         <activity android:name=".VerifyOTP" />
         <activity android:name=".MainActivity" />
@@ -36,7 +26,6 @@
         <activity android:name=".SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

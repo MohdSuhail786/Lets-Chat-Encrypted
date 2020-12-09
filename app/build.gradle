@@ -14,7 +14,7 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-
+    // JAVA 8 SUPPORT
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -30,25 +30,38 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.google.android.material:material:1.0.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.2'
+    implementation 'androidx.cardview:cardview:1.0.0'
+
+    // FIREBASE
     implementation platform('com.google.firebase:firebase-bom:25.12.0')
     implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.google.firebase:firebase-auth'
-    implementation 'com.firebaseui:firebase-ui-storage:6.2.0'
     implementation 'com.google.firebase:firebase-database'
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'com.firebaseui:firebase-ui-storage:6.2.0'
+    implementation 'com.google.firebase:firebase-messaging:20.3.0'
+    implementation 'com.google.firebase:firebase-storage'
+
+    // OTP PIN VIEW
     implementation 'com.chaos.view:pinview:1.4.3'
+
+    // COUNTRY CODE PICKER
     implementation 'com.hbb20:ccp:2.3.1', {
         exclude group: 'com.android.support'
     }
-    implementation 'com.theartofdev.edmodo:android-image-cropper:2.8.+'
-    implementation 'com.google.firebase:firebase-storage'
+
+    // CIRCULAR IMAGE
     implementation 'de.hdodenhof:circleimageview:3.1.0'
-    implementation 'com.google.firebase:firebase-messaging:20.3.0'
+
+    // IMAGE CROPPING
+    implementation 'com.theartofdev.edmodo:android-image-cropper:2.8.+'
+
+    // HTTP LIBRARY (NETWORKING)
     implementation 'com.android.volley:volley:1.1.1'
-    implementation 'androidx.cardview:cardview:1.0.0'
+
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'

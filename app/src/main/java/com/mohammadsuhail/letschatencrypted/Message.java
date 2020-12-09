@@ -1,11 +1,11 @@
 package com.mohammadsuhail.letschatencrypted;
 
 public class Message {
-    private String message;
-    private String time;
-    private String number;
-    private String status;
-    private String senderimage;
+        private String message;
+        private String time;
+        private String number;
+        private String status;
+        private String senderimage;
 
     public Message() {
     }

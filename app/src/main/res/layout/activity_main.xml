@@ -42,10 +42,12 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.viewpager.widget.ViewPager
+        android:id="@+id/mainTabsPager"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/appBarLayout"
-        android:id="@+id/mainTabsPager">
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="44dp">
 
     </androidx.viewpager.widget.ViewPager>
 

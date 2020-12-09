@@ -125,7 +125,6 @@ public class ChatboxActivity extends AppCompatActivity {
 
     }
 
-
     private void sendNotificationToUser(String number, String message) throws JSONException {
         JSONObject mainObj = new JSONObject();
         mainObj.put("to", "/topics/" + number.substring(2));
@@ -256,17 +255,13 @@ public class ChatboxActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    Log.i("xxxx", "CALLED");
                     for (DataSnapshot s : snapshot.getChildren()) {
                         Message msg = s.getValue(Message.class);
                         assert msg != null;
                         msg.setStatus("FROM");
-                        Log.i("xxxx", "CHATBOXACTIVITY");
                         String getName = nnHashmap.get(msg.getNumber());
                         if (getName == null) getName = msg.getNumber();
-                        Log.i("xxxx", getName);
-                        Log.i("xxxx", msg.getMessage());
-                        Log.i("xxxx", msg.getNumber());
+
                         DatabaseHandler db = new DatabaseHandler(ChatboxActivity.this);
                         db.deleteChat(new Contact(getName, msg.getNumber(), msg.getSenderimage(), 0));
 
